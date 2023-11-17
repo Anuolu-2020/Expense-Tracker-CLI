@@ -39,7 +39,7 @@ var myArray []int
 // Initialize the array with values
 func init() {
 
-	myArray = []int{56, 2, 33, 10, 57, 25}
+	myArray = []int{6, 9, 3, 10, 7, 2, 7}
 
 }
 
