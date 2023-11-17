@@ -34,11 +34,12 @@ func (data schemas) display() string {
 	return data.name
 }
 
-var myArray [5]int
+var myArray []int
 
+// Initialize the array with values
 func init() {
-	// Initialize the array with values
-	myArray = [5]int{5, 2, 3, 10, 5}
+
+	myArray = []int{56, 2, 33, 10, 57, 25}
 
 }
 
