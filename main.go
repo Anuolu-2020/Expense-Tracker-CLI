@@ -30,8 +30,10 @@ type schemas struct {
 	name string
 }
 
-func (data schemas) display() string {
-	return data.name
+func display(nam, data string) (string) {
+	message := fmt.Sprintf("Hello, my name is %s and I'm a %s", nam, data)
+
+	return message
 }
 
 var myArray []int
@@ -44,7 +46,7 @@ func init() {
 }
 
 func mean(array []int) float64 {
-	var addition = 0
+	var addition int
 
 	for i := 0; i < len(array); i++ {
 		value := array[i]
@@ -57,6 +59,17 @@ func mean(array []int) float64 {
 }
 
 func main() {
+	fmt.Println("Whats your name")
+	var name string
+	fmt.Scan(&name)
+
+	fmt.Println("What do u do")
+	
+    var job string
+	fmt.Scan(&job)
+
+	fmt.Println(display(name, job))
+
 	clock := time.Now()
 	fmt.Println("Hello World", clock)
 	fmt.Println(add(5, 4))
@@ -64,7 +77,4 @@ func main() {
 	fmt.Println(named("Emmanuel"))
 	fmt.Println(mean(myArray[:]))
 
-	person1 := schemas{name: "PROGRAMMED"}
-
-	fmt.Println(person1.display())
 }
