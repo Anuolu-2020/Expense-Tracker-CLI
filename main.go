@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	// "time"
@@ -16,14 +18,14 @@ import (
 // }
 
 // Format and Display Expenses
-func display(id int, amount int, category string, date string, description string) string {
-	message := fmt.Sprintf("%d    N%d   %s  %s   %s", id, amount, category, date, description)
+func display(id int, amount int, category string, description string, date string) string {
+	message := fmt.Sprintf("%d    N%d   %s  %s   %s", id, amount, category, description, date)
 
 	return message
 }
 
 // Add Expenses
-func addExpense(database *sql.DB, err error) {
+func addExpense(database *sql.DB) {
 	fmt.Println("What's the amount")
 
 	var amount int
@@ -40,53 +42,69 @@ func addExpense(database *sql.DB, err error) {
 
 	var description string
 
-	fmt.Scan(&description)
+	scanner := bufio.NewScanner(os.Stdin)
+
+	if scanner.Scan() {
+		description = scanner.Text()
+	}
 
 	var date = time.Now()
 
 	// Format the date in a human-readable way
 	currentDate := date.Format("2006-01-02")
 
-	var statement, _ = database.Prepare("INSERT INTO expense (amount, category, description, currentDate) VALUES(?,?,?,?)")
+	statement, err := database.Prepare("INSERT INTO expense (amount, category, description, currentDate) VALUES (?,?,?,?)")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	statement.Exec(amount, category, description, currentDate)
-	fmt.Println("Expense added succesfully")
-}
+	defer statement.Close()
 
-// Get All Expenses
-func getAllExpenses(rows *sql.Rows, id int, amount int, category string, description string, currentDate string) {
-	fmt.Println("ID   AMOUNT CATEGORY       DATE         DESCRIPTION")
+	statement.Exec(amount, category, description, currentDate)
 
 	fmt.Println()
 
-	rows.Next()
-	{
-		rows.Scan(&id, &amount, &category, &description, &currentDate)
+	fmt.Println("Expense added succesfully")
+}
 
-		fmt.Println(display(id, amount, category, currentDate, description))
+func getAllExpenses(rows *sql.Rows) {
+	fmt.Println("ID   AMOUNT  CATEGORY  DESCRIPTION        DATE")
+	fmt.Println()
+
+	for rows.Next() {
+		var id int
+		var amount int
+		var category string
+		var description string
+		var currentDate string
+
+		err := rows.Scan(&id, &amount, &category, &description, &currentDate)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(display(id, amount, category, description, currentDate))
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
 	}
 }
 
 func main() {
-	database, _ := sql.Open("sqlite3", "./tracker.db")
+	database, err := sql.Open("sqlite3", "./tracker.db")
 
-	database.SetMaxOpenConns(1)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	var statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS expense (id INTEGER PRIMARY KEY, amount INTEGER, category TEXT, description TEXT, currentDate TEXT)")
+	defer database.Close()
+
+	var statement, _ = database.Prepare("CREATE TABLE IF NOT EXISTS expense (id INTEGER PRIMARY KEY, amount INTEGER, category TEXT, description TEXT, currentDate TEXT)")
 
 	statement.Exec()
 
 	rows, _ := database.Query("SELECT id, amount, category, description, currentDate FROM expense")
-
-	var id int
-	var amount int
-	var category string
-	var description string
-	var currentDate string
 
 	var command, verb string
 	// defer statement.Exec(amount, category, description, &currentDate)
@@ -109,10 +127,26 @@ func main() {
 		fmt.Println("option -clear to delete all records in expense db")
 		fmt.Println()
 	} else if command == "tracker" && verb == "-ls" {
-		getAllExpenses(rows, id, amount, category, description, currentDate)
+		getAllExpenses(rows)
 
 	} else if command == "tracker" && verb == "-add" {
-		addExpense(database, err)
+		addExpense(database)
+	} else if command == "tracker" && verb == "-clear" {
+		statement, err := database.Prepare("DELETE FROM expense")
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer statement.Close()
+
+		_, err = statement.Exec()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Expenses data deleted")
 	} else {
 		fmt.Println("Command not found. try 'tracker -help' for instructions")
 	}
