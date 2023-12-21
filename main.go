@@ -5,6 +5,7 @@ import (
 _ "github.com/mattn/go-sqlite3"
 	"fmt"
 	"strconv"
+	// "time"
 )
 
 
@@ -50,13 +51,16 @@ _ "github.com/mattn/go-sqlite3"
 func main() {
 	database, _ := sql.Open("sqlite3", "./tracker.db")
 
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXIST expense (id INTEGER PRIMARY KEY, amount INTEGER, category TEXT, description TEXT, currentDate TEXT)")
+	database.SetMaxOpenConns(1)
+
+   
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS expense (id INTEGER PRIMARY KEY, amount INTEGER, category TEXT, description TEXT, currentDate TEXT)")
 
 	statement.Exec()
 
-	statement, _ = database.Prepare("INSERT INTO expense (amount, category, description, currentDate) VALUES(?,?)")
+	statement, _ = database.Prepare("INSERT INTO expense (amount, category, description, currentDate) VALUES(?,?,?,?)")
 	
-	statement.Exec(100, "testCategory", "testDescription", "2023-12-21")
+	statement.Exec(100, "testCategory2", "testDescription2", "2023-12-22")
 	
 	rows, _ := database.Query("SELECT id, amount, category, description, currentDate FROM expense")
 
