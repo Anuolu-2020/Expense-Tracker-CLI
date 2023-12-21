@@ -20,6 +20,8 @@ tracker -ls
 ID   AMOUNT CATEGORY  DESCRIPTION        DATE
 
 ```
+### Add Expenses
+
 To add expenses in the database, use the following command:
 ```bash
 tracker -add
@@ -36,6 +38,8 @@ Bought Pizza
 
 Expense added succesfully
 ```
+### Delete Expenses
+
 To delete expenses in the database, use the following command:
 ```
 tracker -clear
