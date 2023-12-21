@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
-	"time"
+	"github.com/mattn/go-sqlite3"
+	// "time"
 )
 
 // func add(num1 int, num2 int) int {
@@ -30,17 +32,17 @@ import (
 // 	name string
 // }
 
-func displayHeader() string {
-	message := fmt.Sprintf("AMOUNT  CATEGORY  DATE        DESCRIPTION")
+// func displayHeader() string {
+// 	message := fmt.Sprintf("AMOUNT  CATEGORY  DATE        DESCRIPTION")
 
-	return message
-}
+// 	return message
+// }
 
-func display(amount int, category string, date string, description string) string {
-	message := fmt.Sprintf("N%d   %s  %s   %s", amount, category, date, description)
+// func display(amount int, category string, date string, description string) string {
+// 	message := fmt.Sprintf("N%d   %s  %s   %s", amount, category, date, description)
 
-	return message
-}
+// 	return message
+// }
 
 // var myArray []int
 
@@ -65,37 +67,57 @@ func display(amount int, category string, date string, description string) strin
 // }
 
 func main() {
-	fmt.Println("Welcome to Expense Tracker CLI V0.0.1")
-	fmt.Println()
+	database, _ := sql.Open("sqlite3", "./tracker.db")
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXIST expense (id INTEGER PRIMARY KEY, amount INT, category TEXT, description TEXT, currentDate DATE)")
 
-	fmt.Println("What is the amount")
+	statement.Exec()
 
+	statement.Prepare("INSERT INTO expense (amount, category, description, currentDate) VALUES(?,?)")
+	statement.Exec(100, "testCategory", "testDescription", "2023-12-21")
+	rows, _ := database.Query("SELECT id, amount, category, description, currentDate FROM expense")
+
+	var id int
 	var amount int
-
-	fmt.Scan(&amount)
-
-	fmt.Println("What category is the expense")
-
 	var category string
-
-	fmt.Scan(&category)
-
-	fmt.Println("Expense Description")
-
 	var description string
+	var currentDate Date
 
-	fmt.Scan(&description)
+	for rows.Next() {
+		rows.scan(&id, &amount, &category, &description, &currentDate)
+		fmt.Println(strconv.Itoa(id) + ": " + amount + " " + category + " " + description + " " + currentDate)
+	}
 
-	var date = time.Now()
+	// fmt.Println("Welcome to Expense Tracker CLI V0.0.1")
+	// fmt.Println()
 
-	// Format the date in a human-readable way
-	currentDate := date.Format("2006-01-02")
+	// fmt.Println("What is the amount")
 
-	fmt.Println(displayHeader())
+	// var amount int
 
-    fmt.Println()
+	// fmt.Scan(&amount)
 
-	fmt.Println(display(amount, category, currentDate, description))
+	// fmt.Println("What category is the expense")
+
+	// var category string
+
+	// fmt.Scan(&category)
+
+	// fmt.Println("Expense Description")
+
+	// var description string
+
+	// fmt.Scan(&description)
+
+	// var date = time.Now()
+
+	// // Format the date in a human-readable way
+	// currentDate := date.Format("2006-01-02")
+
+	// fmt.Println(displayHeader())
+
+	// fmt.Println()
+
+	// fmt.Println(display(amount, category, currentDate, description))
 
 	// clock := time.Now()
 	// fmt.Println("Hello World", clock)
