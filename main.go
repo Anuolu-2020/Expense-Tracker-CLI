@@ -2,31 +2,12 @@ package main
 
 import (
 	"database/sql"
+_ "github.com/mattn/go-sqlite3"
 	"fmt"
-	"github.com/mattn/go-sqlite3"
-	// "time"
+	"strconv"
 )
 
-// func add(num1 int, num2 int) int {
 
-// 	return num1 + num2
-// }
-
-// func subtract(num1, num2 int) int {
-// 	result := num1 - num2
-
-// 	if result < 0 {
-// 		fmt.Println("Negative value")
-// 	} else {
-// 		fmt.Println("Positve Value")
-// 	}
-// 	return result
-// }
-
-// func named(name string) string {
-// 	return name
-
-// }
 
 // type schemas struct {
 // 	name string
@@ -68,23 +49,26 @@ import (
 
 func main() {
 	database, _ := sql.Open("sqlite3", "./tracker.db")
-	statement, _ := database.Prepare("CREATE TABLE IF NOT EXIST expense (id INTEGER PRIMARY KEY, amount INT, category TEXT, description TEXT, currentDate DATE)")
+
+	statement, _ := database.Prepare("CREATE TABLE IF NOT EXIST expense (id INTEGER PRIMARY KEY, amount INTEGER, category TEXT, description TEXT, currentDate TEXT)")
 
 	statement.Exec()
 
-	statement.Prepare("INSERT INTO expense (amount, category, description, currentDate) VALUES(?,?)")
+	statement, _ = database.Prepare("INSERT INTO expense (amount, category, description, currentDate) VALUES(?,?)")
+	
 	statement.Exec(100, "testCategory", "testDescription", "2023-12-21")
+	
 	rows, _ := database.Query("SELECT id, amount, category, description, currentDate FROM expense")
 
 	var id int
 	var amount int
 	var category string
 	var description string
-	var currentDate Date
+	var currentDate string
 
 	for rows.Next() {
-		rows.scan(&id, &amount, &category, &description, &currentDate)
-		fmt.Println(strconv.Itoa(id) + ": " + amount + " " + category + " " + description + " " + currentDate)
+		rows.Scan(&id, &amount, &category, &description, &currentDate)
+		fmt.Println(strconv.Itoa(id) + ": " + strconv.Itoa(amount) + " " + category + " " + description + " " + currentDate)
 	}
 
 	// fmt.Println("Welcome to Expense Tracker CLI V0.0.1")
