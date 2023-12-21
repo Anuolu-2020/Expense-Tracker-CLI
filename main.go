@@ -68,6 +68,7 @@ func addExpense(database *sql.DB) {
 	fmt.Println("Expense added succesfully")
 }
 
+//Get All expenses
 func getAllExpenses(rows *sql.Rows) {
 	fmt.Println("ID   AMOUNT  CATEGORY  DESCRIPTION        DATE")
 	fmt.Println()
@@ -89,6 +90,22 @@ func getAllExpenses(rows *sql.Rows) {
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// Get Total Expenses
+func getTotalExpenses(database *sql.DB) int {
+	var total int
+
+	// Query to sum all amounts in the "expense" table
+	row := database.QueryRow("SELECT SUM(amount) FROM expense")
+
+	// Scan the sum into the 'total' variable
+	err := row.Scan(&total)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return total
 }
 
 func main() {
@@ -128,7 +145,7 @@ func main() {
 		fmt.Println()
 	} else if command == "tracker" && verb == "-ls" {
 		getAllExpenses(rows)
-
+		fmt.Printf("Total Expenses: %d\n", getTotalExpenses(database))
 	} else if command == "tracker" && verb == "-add" {
 		addExpense(database)
 	} else if command == "tracker" && verb == "-clear" {
